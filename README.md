@@ -1,5 +1,5 @@
 # Log17
-
+11;rgb:eeee/eeee/ecec
 Log17 is a small C++17 header for static logging.
 
 Static logging is when you associate a singleton log object with a class of message-generating code,
@@ -20,7 +20,7 @@ These parameters act as sinks for the prior Logger, allowing you to construct en
 For example, you can have a main application Log singleton that's tied to a FILE* Log acting as a sink,
   and another FILE* Log which writes to a file.
 When you write to the application Log, it writes to both of its underlying sinks.
-On top of that, you can have feature or module Log which uses the main application Log as /its/ sink.
+On top of that, you can have feature or module Log which uses the main application Log as ~its~ sink.
 
 Each Log singleton comes with nine levels of verbosity and can be configured by a
   template parameter (and hence via preprocessor macro) or at runtime.
