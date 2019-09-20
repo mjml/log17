@@ -6,7 +6,7 @@ Log17 is a small C++17 header for static logging.
 It is *static* because the number of `Log`s doesn't change and hence the class can use static methods
   for dispatching messages.
 No object instantiation is necessary.
-This library uses partial template specialization of a single class to provide both logs and sinks.
+This library uses partial template specialization of a single class template to provide both logs and sinks.
 
 The API comes with a built-in `FILE*` sink, but customizing it for other i/o (e.g. `std::iostream`) is rudimentary.
 The `FILE*` sink is enough to pass in stdio, file, and `popen()` handles.
