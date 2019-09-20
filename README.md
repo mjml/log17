@@ -16,7 +16,7 @@ You can then instantiate a singleton `Log` classes which accept any number of ot
 These parameters act as sinks for the prior `Log`, allowing you to construct entire graphs
   of `Log` objects.
 
-For example, you can have a main application `Log` that's tied to a `FILE*` Log acting as a sink,
+For example, you can have a main application `Log` that's tied to a `FILE*`-based `Log` acting as a sink,
   and another `FILE*`-based `Log` which writes to a file.
 When you write to the application `Log`, it writes to both of its underlying sinks.
 On top of that, you can have feature or module Log which uses the main application `Log` as *its* sink.
