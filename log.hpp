@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include <cassert>
 #include <stdexcept>
-#include "util/errno_exception.hpp"
+#include "errno_exception.hpp"
 
 
 enum LogLevel {
@@ -32,7 +32,6 @@ struct Log
 {
 	inline static int level = Level;
 	
-protected:
 	static void write (const char* szstr, int size)
 	{
 		(Sinks::write(szstr,size), ...);
@@ -42,7 +41,7 @@ protected:
 	static void fmtprint (int lvl, const char* fmt, Ps...ps);
 	
 public:
-	static void initialize () {}
+	static void initialize () { }
 
 	static void finalize () {}
 
@@ -51,9 +50,9 @@ public:
 	template<typename...Ps> static void debug (const char* fmt, Ps...ps)  { log_at_level<LogLevel::DBG, Ps...> (fmt,ps...); }
 	template<typename...Ps> static void detail (const char* fmt, Ps...ps) { log_at_level<LogLevel::DETAIL,Ps...> (fmt,ps...); }
 	template<typename...Ps> static void info (const char* fmt, Ps...ps)   { log_at_level<LogLevel::INFO,Ps...> (fmt,ps...); }
-  template<typename...Ps> static void print (const char* fmt, Ps...ps)  { log_at_level<LogLevel::PRINT,Ps...> (fmt,ps...); }
+	template<typename...Ps> static void print (const char* fmt, Ps...ps)  { log_at_level<LogLevel::PRINT,Ps...> (fmt,ps...); }
 	template<typename...Ps>	static void fuss (const char* fmt, Ps...ps)   { log_at_level<LogLevel::FUSS,Ps...> (fmt,ps...); }
-  template<typename...Ps> static void warning (const char* fmt, Ps...ps) { log_at_level<LogLevel::WARNING,Ps...> (fmt,ps...); }
+	template<typename...Ps> static void warning (const char* fmt, Ps...ps) { log_at_level<LogLevel::WARNING,Ps...> (fmt,ps...); }
 	template<typename...Ps> static void error (const char* fmt, Ps...ps)  { log_at_level<LogLevel::ERROR,Ps...> (fmt,ps...); }
 	template<typename...Ps> static void critical (const char* fmt, Ps...ps) { log_at_level<LogLevel::CRITICAL,Ps...> (fmt,ps...); }
 	
@@ -63,7 +62,7 @@ public:
 template<int Level, const char* Name>
 struct Log<Level,Name,FILE>
 {
-	inline static int level;
+	inline static int level = Level;
 	inline static FILE* file;
 	static void initialize_with_filename(const std::string& filename);
 	static void initialize_with_handle(FILE* fh) { file = fh; }
@@ -85,7 +84,7 @@ template<int Level, const char* Name>
 void Log<Level, Name, FILE>::finalize ()
 {
 	assert(file != nullptr);
-	if (!fclose(file)) { throw errno_exception(std::runtime_error); }
+	if (fclose(file)) { throw errno_exception(std::runtime_error); }
 }
 
 
@@ -123,7 +122,14 @@ template<int Level, const char* Name, typename...Sinks>
 template<int Lvl, typename...Ps>
 inline void Log<Level,Name,Sinks...>::log_at_level (const char* fmt, Ps...ps)
 {
-	if (Level < Lvl) return;
-	if (level < Lvl) return;
-	fmtprint(Lvl, fmt, ps...);
+	if constexpr (Level >= Lvl) {
+		fmtprint(Lvl, fmt, ps...);
+	}
+	fmt = fmt;
 }
+
+
+extern const char stdoutname[];
+extern template struct Log<12,stdoutname,FILE>;
+typedef Log<3,stdoutname,FILE> StdioSink;
+
