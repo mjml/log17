@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include <cassert>
 #include <stdexcept>
-#include "errno_exception.hpp"
+#include <system_error>
 
 
 enum LogLevel {
@@ -18,10 +18,10 @@ enum LogLevel {
 								CRITICAL, // An invariant is breached, or program state is jeopardized so that exit is required.
 								ERROR,    // An invariant is breached, the current user operation/intent will fail, but the program can recover or resume.
 								WARNING,  // An invariant may be breached, but program state is OK and the user operation will succeed.
-								PRINT,    // Status messages that record nominal execution but that is neither voluminous nor proportional to input complexity.
+								PRINT,    // Status messages that record nominal execution but that is neither large nor proportional to input complexity.
 								FUSS,     // Unexpected condition that is part of proper execution but may indicate improper usage by the user.
-								INFO,     // Status messages that are not volumous in proportion to input complexity.
-								DETAIL,   // Status messages that can be volumous in proportion to input complexity.
+								INFO,     // Status messages that are not large in proportion to input complexity.
+								DETAIL,   // Status messages that can be large in proportion to input complexity.
 								DBG,    // Messages that are intended to show specific information with the intent of detecting preconditions to failure.
 								DBG2    // The firehose.
 };
@@ -76,7 +76,7 @@ void Log<Level, Name, FILE>::initialize_with_filename (const std::string& filena
 {
 	using namespace std;
 	file = fopen(filename.c_str(), "w+");
-	if (!file) { throw errno_exception(std::runtime_error); }
+	if (!file) { throw std::system_error(errno, std::system_category()); }
 }
 
 
@@ -84,7 +84,7 @@ template<int Level, const char* Name>
 void Log<Level, Name, FILE>::finalize ()
 {
 	assert(file != nullptr);
-	if (fclose(file)) { throw errno_exception(std::runtime_error); }
+	if (fclose(file)) { throw std::system_error(errno, std::system_category()); }
 }
 
 
@@ -92,13 +92,13 @@ template<int Level, const char* Name>
 inline void Log<Level, Name, FILE>::write (const char* szstr, int size)
 {
 	if (!fwrite(szstr, size, 1, file)) {
-		throw errno_runtime_error;
+		throw std::system_error(errno, std::system_category());
 	}
 	if (!fputc('\n',file)) {
-		throw errno_runtime_error;
+		throw std::system_error(errno, std::system_category());
 	}
 	if (fflush(file)) {
-		throw errno_runtime_error;
+		throw std::system_error(errno, std::system_category());
 	}
 }
 
